@@ -14,9 +14,19 @@ const routes = createRouter({
       component: () => import("@/views/JobsView.vue"),
     },
     {
-      path: '/jobs/:id',
+      path: "/jobs/:id",
       name: "JobDetails",
       component: () => import("@/views/JobDetailsView.vue"),
+    },
+    {
+      path: "/jobs/edit/:id",
+      name: "JobEdit",
+      component: () => import("@/views/EditJobs.vue"),
+    },
+    {
+      path: "/jobs/add",
+      name: "Add job",
+      component: () => import("@/views/AddJobs.vue"),
     },
     {
       path: "/:notFound",

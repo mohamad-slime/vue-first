@@ -1,9 +1,14 @@
 <script setup>    ;
     import routes from '@/router';
-    import { reactive } from 'vue';
-    import { RouterLink } from 'vue-router';
+    import { reactive, onMounted } from 'vue';
+    import { RouterLink, useRoute } from 'vue-router';
 
+    const route = useRoute();
+    const jobId = route.params.id;
 
+    const jobData = reactive({
+        job: {},
+    });
 
     const form = reactive({
         type: 'Full-Time',
@@ -20,21 +25,48 @@
 
 
     });
+
+
+    onMounted(async () => {
+        try {
+            const response = await fetch(`http://localhost:3030/jobs/${jobId}`);
+            if (!response.ok) throw new Error('Failed to fetch job data');
+            jobData.job = await response.json();
+            form.type = jobData.job.type;
+            form.title = jobData.job.title;
+            form.description = jobData.job.description;
+            form.salary = jobData.job.salary;
+            form.location = jobData.job.location;
+            form.company.name = jobData.job.company.name;
+            form.company.description = jobData.job.company.description;
+            form.company.contactEmail = jobData.job.company.contactEmail;
+            form.company.contactPhone = jobData.job.company.contactPhone;
+
+
+
+
+        } catch (error) {
+            console.log("Eroor" + error);
+
+        }
+    });
+
+
+
     const submitHandler = async () => {
-        const newJob = {
+        const EditJob = {
             ...form,
-            id: Math.floor(Math.random() * 1000000).toString()  ,
         }
         try {
-            await fetch('http://localhost:3030/jobs', {
-                method: 'POST',
+            await fetch(`http://localhost:3030/jobs/${jobId}`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(newJob),
-            }).then(() => {
-                routes.push(`/jobs/${newJob.id}`);
+                body: JSON.stringify(EditJob),
             })
+            routes.push(`/jobs/${jobId}`);
+
 
 
         } catch (error) {
@@ -55,7 +87,7 @@
         <div class="container m-auto max-w-2xl py-24">
             <div class="bg-white px-6 py-8 mb-4 border border-green-800 shadow-emerald-100  rounded-xl  md:m-0">
                 <form @submit.prevent="submitHandler">
-                    <h2 class="text-3xl text-center font-semibold mb-6">Add Job</h2>
+                    <h2 class="text-3xl text-center font-semibold mb-6">Edit Job</h2>
 
                     <div class="mb-4">
                         <label for="type" class="block text-gray-700 font-bold mb-2">Job Type</label>
@@ -140,7 +172,7 @@
                         <button
                             class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline"
                             type="submit">
-                            Add Job
+                            edit Job
                         </button>
                     </div>
                 </form>

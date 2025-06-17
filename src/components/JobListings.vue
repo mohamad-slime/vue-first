@@ -1,20 +1,36 @@
 <script setup lang="js">
     import { RouterLink } from 'vue-router';
-    import jobData from '@/jobs.json';
     import JobCard from '@/components/Job.vue';
-    import { ref, defineProps } from 'vue';
+    import { ref, defineProps, onMounted } from 'vue';
 
     const props = defineProps({
         limit: {
-            type: Number,
-            default: 6
+            type: Number
         },
         showButton: {
             type: Boolean,
             default: false
         }
 
-    })
+    });
+
+    const jobData = ref([]);
+    // Fetch job data from the API
+    const fetchJobData = async () => {
+        try {
+            const data = (await fetch('http://localhost:3030/jobs'));
+            const jobs = await data.json();
+            jobData.value = jobs;
+        } catch (error) {
+            console.error('Error fetching job data:', error);
+            return [];
+        }
+    }
+
+    onMounted(() => {
+        fetchJobData();
+    });
+
 </script>
 
 <template>
@@ -22,7 +38,7 @@
         <div class="container-xl lg:container mx-auto m-auto">
             <h2 class="text-2xl font-bold mb-4 text-emerald-800 text-center ">Job Listings</h2>
             <div class="grid grid-cols-1 xl:grid-cols-3  md:grid-cols-2 sm:grid-cols-2  gap-3">
-                <JobCard v-for="job in jobData.slice(0, limit || jobData.length)" :key="job.id" :job="job" />
+                <JobCard v-for="job in jobData.slice(0, props.limit || jobData.length)" :key="job.id" :job="job" />
             </div>
         </div>
     </section>
